@@ -10,6 +10,15 @@ pipeline {
     REPOSITORY = "${DOCKER_HUB_USR}/anchore-jenkins-pipeline-demo"
     TAG1 = "image1-${BUILD_NUMBER}"
     TAG2 = "image2-${BUILD_NUMBER}"
+    // we'll need the anchore credential to pass the user
+    // and password to anchore-cli so it can upload the results
+    ANCHORE_CREDENTIAL = "AnchoreJenkinsUser"
+    // use credentials to set ANCHORE_USR and ANCHORE_PSW
+    ANCHORE = credentials("${ANCHORE_CREDENTIAL}")
+    //
+    // api endpoint of your anchore instance
+    ANCHORE_URL = "http://anchore3-priv.novarese.net:8228/v1"
+
 } // end environment 
   agent any
   stages {
@@ -34,9 +43,9 @@ pipeline {
         script {
           try {
             sh """
-              anchore-cli image add --force --dockerfile Dockerfile-1 --noautosubscribe ${REPOSITORY}:${TAG1}
-              anchore-cli image wait ${REPOSITORY}:${TAG1}
-              anchore-cli evaluate check ${REPOSITORY}:${TAG1}
+              anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image add --force --dockerfile Dockerfile-1 --noautosubscribe ${REPOSITORY}:${TAG1}
+              anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image wait ${REPOSITORY}:${TAG1}
+              anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} evaluate check ${REPOSITORY}:${TAG1}
             """
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
@@ -64,9 +73,9 @@ pipeline {
         script {
           try {
             sh """
-              anchore-cli image add --force --dockerfile Dockerfile-2 --noautosubscribe ${REPOSITORY}:${TAG2}
-              anchore-cli image wait ${REPOSITORY}:${TAG2}
-              anchore-cli evaluate check ${REPOSITORY}:${TAG2}
+              anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image add --force --dockerfile Dockerfile-2 --noautosubscribe ${REPOSITORY}:${TAG2}
+              anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image wait ${REPOSITORY}:${TAG2}
+              anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} evaluate check ${REPOSITORY}:${TAG2}
             """
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
