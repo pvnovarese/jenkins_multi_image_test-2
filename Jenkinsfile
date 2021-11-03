@@ -10,7 +10,7 @@ pipeline {
     REPOSITORY = "${DOCKER_HUB_USR}/anchore-jenkins-pipeline-demo"
     TAG1 = "image1-${BUILD_NUMBER}"
     TAG2 = "image2-${BUILD_NUMBER}"
-    IMAGELINE1 = "${REPOSITORY}:${TAG} Dockerfile-2"
+    IMAGELINE1 = "${REPOSITORY}:${TAG} Dockerfile-1"
     IMAGELINE2 = "${REPOSITORY}:${TAG} Dockerfile-2"
 } // end environment 
   agent any
