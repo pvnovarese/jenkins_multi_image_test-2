@@ -46,6 +46,34 @@ pipeline {
         } // end script 
       } // end steps
     } // end stage "analyze image 1 with anchore plugin"
+    
+    stage('Build and push Image 2') {
+      steps {
+        script {
+          sh """
+            docker login -u ${DOCKER_HUB_USR} -p ${DOCKER_HUB_PSW}
+            docker build -t ${REPOSITORY}:${TAG2} -f ./Dockerfile-2 .
+            docker push ${REPOSITORY}:${TAG2}
+          """
+        } // end script
+      } // end steps
+    } // end stage "build image and push to registry"
+    stage('Analyze Image 2 with Anchore plugin') {
+      steps {
+        writeFile file: 'anchore_images-2', text: IMAGELINE2
+        script {
+          try {
+            // forceAnalyze is a good idea since we're passing a Dockerfile with the image
+            anchore name: 'anchore_images-2', forceAnalyze: 'true', engineRetries: '900'
+          } catch (err) {
+            // if scan fails, clean up (delete the image) and fail the build
+            sh 'docker rmi ${REPOSITORY}:${TAG2}'
+            sh 'exit 1'
+          } // end try
+        } // end script 
+      } // end steps
+    } // end stage "analyze image 1 with anchore plugin"
+    
     stage('Clean up') {
       // if we succuessfully pushed the :prod tag than we don't need the $BUILD_ID tag anymore
       steps {
