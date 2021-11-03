@@ -7,7 +7,7 @@ pipeline {
     // you need a credential named 'docker-hub' with your DockerID/password to push images
     CREDENTIAL = "docker-hub"
     DOCKER_HUB = credentials("$CREDENTIAL")
-    REPOSITORY = "${DOCKER_HUB_USR}/anchore-jenkins-pipeline-demo"
+    REPOSITORY = "${DOCKER_HUB_USR}/anchore-jenkins-pipeline-demo-improved"
     TAG1 = "image1-${BUILD_NUMBER}"
     TAG2 = "image2-${BUILD_NUMBER}"
     // we'll need the anchore credential to pass the user
@@ -43,7 +43,6 @@ pipeline {
         script {
           try {
             sh """
-              anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} system status
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image add --force --dockerfile Dockerfile-1 --noautosubscribe ${REPOSITORY}:${TAG2}
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image wait ${REPOSITORY}:${TAG1}
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} evaluate check ${REPOSITORY}:${TAG1}
@@ -70,7 +69,6 @@ pipeline {
     } // end stage "build image and push to registry"
     stage('Analyze Image 2 with Anchore plugin') {
       steps {
-        writeFile file: 'anchore_images-2', text: IMAGELINE2
         script {
           try {
             sh """
