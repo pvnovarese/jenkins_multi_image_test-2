@@ -76,10 +76,6 @@ pipeline {
     
     stage('Analyze both images with Anchore plugin') {
       steps {
-        sh """
-          cat ${IMAGELINE1} > anchore_images-3
-          cat ${IMAGELINE2} >> anchore_images-3
-        """
         script {
           try {
             sh """
