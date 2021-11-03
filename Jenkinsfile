@@ -79,14 +79,14 @@ pipeline {
         script {
           try {
             sh """
-              echo ${IMAGELINE1} > anchore_images-3
-              echo ${IMAGELINE2} >> anchore_images-3
+              echo ${REPOSITORY}:${TAG1} > anchore_images-3
+              echo ${REPOSITORY}:${TAG2} >> anchore_images-3
             """
-            // forceAnalyze is a good idea since we're passing a Dockerfile with the image
-            anchore name: 'anchore_images-3', forceAnalyze: 'true', engineRetries: '900'
+            // forceAnalyze isn't needed this time since we already sent the dockerfiles
+            anchore name: 'anchore_images-3', forceAnalyze: 'false', engineRetries: '900'
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
-            sh 'docker rmi ${REPOSITORY}:${TAG2}'
+            sh 'docker rmi ${REPOSITORY}:${TAG1} ${REPOSITORY}:${TAG2}'
             sh 'exit 1'
           } // end try
         } // end script 
