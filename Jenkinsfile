@@ -43,7 +43,7 @@ pipeline {
         script {
           try {
             sh """
-              anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image add --force --dockerfile Dockerfile-1 --noautosubscribe ${REPOSITORY}:${TAG2}
+              anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image add --force --dockerfile Dockerfile-1 --noautosubscribe ${REPOSITORY}:${TAG1}
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} image wait ${REPOSITORY}:${TAG1}
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} evaluate check ${REPOSITORY}:${TAG1}
             """
