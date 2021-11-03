@@ -43,6 +43,7 @@ pipeline {
         script {
           try {
             sh """
+              echo '${ANCHORE_URL} ${ANCHORE_USR} ${ANCHORE_PSW}' > anchore-cli-vars
               anchore-cli -url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} system status
             """
           } catch (err) {
