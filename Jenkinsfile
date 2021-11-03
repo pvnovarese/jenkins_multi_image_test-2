@@ -10,8 +10,6 @@ pipeline {
     REPOSITORY = "${DOCKER_HUB_USR}/anchore-jenkins-pipeline-demo"
     TAG1 = "image1-${BUILD_NUMBER}"
     TAG2 = "image2-${BUILD_NUMBER}"
-    IMAGELINE1 = "${REPOSITORY}:${TAG1} Dockerfile-1"
-    IMAGELINE2 = "${REPOSITORY}:${TAG2} Dockerfile-2"
 } // end environment 
   agent any
   stages {
@@ -31,13 +29,15 @@ pipeline {
         } // end script
       } // end steps
     } // end stage "build image and push to registry"
-    stage('Analyze Image 1 with Anchore plugin') {
+    stage('Analyze Image 1 with anchore-cli') {
       steps {
-        writeFile file: 'anchore_images-1', text: IMAGELINE1
         script {
           try {
-            // forceAnalyze is a good idea since we're passing a Dockerfile with the image
-            anchore name: 'anchore_images-1', forceAnalyze: 'true', engineRetries: '900'
+            sh """
+              anchore-cli image add --force --dockerfile Dockerfile-1 --noautosubscribe ${REPOSITORY}:${TAG1}
+              anchore-cli image wait ${REPOSITORY}:${TAG1}
+              anchore-cli evaluate check ${REPOSITORY}:${TAG1}
+            """
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
             sh 'docker rmi ${REPOSITORY}:${TAG1}'
@@ -63,8 +63,11 @@ pipeline {
         writeFile file: 'anchore_images-2', text: IMAGELINE2
         script {
           try {
-            // forceAnalyze is a good idea since we're passing a Dockerfile with the image
-            anchore name: 'anchore_images-2', forceAnalyze: 'true', engineRetries: '900'
+            sh """
+              anchore-cli image add --force --dockerfile Dockerfile-2 --noautosubscribe ${REPOSITORY}:${TAG2}
+              anchore-cli image wait ${REPOSITORY}:${TAG2}
+              anchore-cli evaluate check ${REPOSITORY}:${TAG2}
+            """
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
             sh 'docker rmi ${REPOSITORY}:${TAG2}'
