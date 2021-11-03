@@ -31,7 +31,7 @@ pipeline {
         } // end script
       } // end steps
     } // end stage "build image and push to registry"
-    stage('Analyze with Anchore plugin') {
+    stage('Analyze Image 1 with Anchore plugin') {
       steps {
         writeFile file: 'anchore_images-1', text: IMAGELINE1
         script {
@@ -40,26 +40,16 @@ pipeline {
             anchore name: 'anchore_images-1', forceAnalyze: 'true', engineRetries: '900'
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
-            sh 'docker rmi ${REPOSITORY}:${TAG}'
+            sh 'docker rmi ${REPOSITORY}:${TAG1}'
             sh 'exit 1'
           } // end try
         } // end script 
       } // end steps
-    } // end stage "analyze with anchore plugin"
-    stage('Re-tag as prod and push stable image to registry') {
-      steps {
-        script {
-          docker.withRegistry('', CREDENTIAL) {
-            dockerImage.push('prod') 
-            // dockerImage.push takes the argument as a new tag for the image before pushing
-          }
-        } // end script 
-      } // end steps
-    } // end stage "retag as prod"
+    } // end stage "analyze image 1 with anchore plugin"
     stage('Clean up') {
       // if we succuessfully pushed the :prod tag than we don't need the $BUILD_ID tag anymore
       steps {
-        sh 'docker rmi ${REPOSITORY}${TAG} ${REPOSITORY}:prod'
+        sh 'docker rmi ${REPOSITORY}:${TAG1} ${REPOSITORY}:${TAG2}'
       } // end steps
     } // end stage "clean up"
   } // end stages
