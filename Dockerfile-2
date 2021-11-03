@@ -1,0 +1,8 @@
+FROM alpine:latest
+
+EXPOSE 443
+RUN date >> /build_timestamp && \
+    apk add --no-cache vim
+USER 65534:65534
+HEALTHCHECK CMD /bin/true
+CMD /bin/false
