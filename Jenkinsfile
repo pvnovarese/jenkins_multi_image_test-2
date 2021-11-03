@@ -83,8 +83,8 @@ pipeline {
         script {
           try {
             sh """
-              cat ${IMAGELINE1} > anchore_images-3
-              cat ${IMAGELINE2} >> anchore_images-3
+              echo ${IMAGELINE1} > anchore_images-3
+              echo ${IMAGELINE2} >> anchore_images-3
             """
             // forceAnalyze is a good idea since we're passing a Dockerfile with the image
             anchore name: 'anchore_images-3', forceAnalyze: 'true', engineRetries: '900'
