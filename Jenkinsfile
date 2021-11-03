@@ -8,9 +8,11 @@ pipeline {
     CREDENTIAL = "docker-hub"
     DOCKER_HUB = credentials("$CREDENTIAL")
     REPOSITORY = "${DOCKER_HUB_USR}/anchore-jenkins-pipeline-demo"
-    TAG = ":devbuild-${BUILD_NUMBER}"
-    IMAGELINE = "${REPOSITORY}${TAG} Dockerfile"
-  } // end environment 
+    TAG1 = "image1-${BUILD_NUMBER}"
+    TAG2 = "image2-${BUILD_NUMBER}"
+    IMAGELINE1 = "${REPOSITORY}:${TAG} Dockerfile-2"
+    IMAGELINE2 = "${REPOSITORY}:${TAG} Dockerfile-2"
+} // end environment 
   agent any
   stages {
     stage('Checkout SCM') {
@@ -18,26 +20,27 @@ pipeline {
         checkout scm
       } // end steps
     } // end stage "checkout scm"
-    stage('Build image and push to registry') {
+    stage('Build and push Image 1') {
       steps {
         script {
-          dockerImage = docker.build REPOSITORY + TAG
-          docker.withRegistry( '', CREDENTIAL ) { 
-            dockerImage.push() 
-          }
+          sh """
+            docker login -u ${DOCKER_HUB_USR} -p ${DOCKER_HUB_PSW}
+            docker build -t ${REPOSITORY}:${TAG1} -f ./Dockerfile-1 .
+            docker push ${REPOSITORY}:${TAG1}
+          """
         } // end script
       } // end steps
     } // end stage "build image and push to registry"
     stage('Analyze with Anchore plugin') {
       steps {
-        writeFile file: 'anchore_images', text: IMAGELINE
+        writeFile file: 'anchore_images-1', text: IMAGELINE1
         script {
           try {
             // forceAnalyze is a good idea since we're passing a Dockerfile with the image
-            anchore name: 'anchore_images', forceAnalyze: 'true', engineRetries: '900'
+            anchore name: 'anchore_images-1', forceAnalyze: 'true', engineRetries: '900'
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
-            sh 'docker rmi ${REPOSITORY}${TAG}'
+            sh 'docker rmi ${REPOSITORY}:${TAG}'
             sh 'exit 1'
           } // end try
         } // end script 
