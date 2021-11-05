@@ -50,6 +50,8 @@ pipeline {
           } catch (err) {
             // if scan fails, clean up (delete the image) and fail the build
             sh 'docker rmi ${REPOSITORY}:${TAG1}'
+            sh 'echo ${REPOSITORY}:${TAG1} > anchore_images-1'
+            anchore name: 'anchore_images-1', forceAnalyze: 'false', engineRetries: '900'
             sh 'exit 1'
           } // end try
         } // end script 
