@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-EXPOSE 9999
+EXPOSE 22
 RUN date >> /build_timestamp && \
     apk add --no-cache vim
 USER 65534:65534
