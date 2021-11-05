@@ -48,7 +48,7 @@ pipeline {
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} evaluate check ${REPOSITORY}:${TAG1}
             """
           } catch (err) {
-            // if scan fails, clean up (delete the image) and fail the build
+            // if scan fails, clean up (delete the image), grab the report via plug-in, and fail the build
             sh 'docker rmi ${REPOSITORY}:${TAG1}'
             sh 'echo ${REPOSITORY}:${TAG1} > anchore_images-1'
             anchore name: 'anchore_images-1', forceAnalyze: 'false', engineRetries: '900'
@@ -79,8 +79,11 @@ pipeline {
               anchore-cli --url ${ANCHORE_URL} --u ${ANCHORE_USR} --p ${ANCHORE_PSW} evaluate check ${REPOSITORY}:${TAG2}
             """
           } catch (err) {
-            // if scan fails, clean up (delete the image) and fail the build
+            // if scan fails, clean up (delete the image), grab the report via plug-in, and fail the build
             sh 'docker rmi ${REPOSITORY}:${TAG2}'
+            sh 'echo ${REPOSITORY}:${TAG1} > anchore_images-2'
+            sh 'echo ${REPOSITORY}:${TAG2} >> anchore_images-2'
+            anchore name: 'anchore_images-2', forceAnalyze: 'false', engineRetries: '900'
             sh 'exit 1'
           } // end try
         } // end script 
